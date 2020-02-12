@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>利用d3实现修改hello world</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+<p>hello World</p>
+<script>
+    var p = document.getElementsByTagName('p')[0]   ;
+    p.onclick = function () {
+      d3.select('body').select('p').text('change success')
+    }
+</script>
+</body>
+</html>

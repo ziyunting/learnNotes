@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style>
+        .axis path,
+        .axis line{
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+    </style>
+
+</head>
+<body>
+<script>
+    //添加画布
+    var svg = d3.select('body').append('svg').attr('width', 300).attr('height', 300);
+
+    //模拟数据
+    // let dataSet = [123, 56, 100, 80, 160];
+    //修改dataset为小数，测试比例尺
+    let dataSet = [1.2, 2.3, 6.7, 3, 2.2];
+    let linear = d3.scale.linear().domain([0, d3.max(dataSet)]).range([0, 250]);
+    let axis = d3.svg.axis() //坐标轴组件
+        .scale(linear)      //指定比例尺
+        .orient("bottom")   //指定刻度的方向
+        .ticks(7);          //指定刻度的数量
+    //实现矩形
+    let rectHeight = 25;
+    svg.selectAll('rect')
+        .data(dataSet).enter()
+        .append('rect')
+        .attr('x', 20)
+        .attr('y', function (d, i) {
+            return i * rectHeight;
+        })
+        .attr('width', function (d, i) {
+            return linear(d);
+            // return d;
+        })
+        .attr('height', function (d, i) {
+            return rectHeight - 2
+        })
+        .attr('fill', 'steelblue')
+    svg.append("g")
+        .attr("class","axis")
+        .attr("transform","translate(20,130)")
+        .call(axis);
+</script>
+</body>
+</html>

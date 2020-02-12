@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="area1">
+    <p></p>
+    <p></p>
+    <p></p>
+</div>
+<div class="area2">
+    <p></p>
+    <p></p>
+    <p></p>
+</div>
+
+<script>
+    let str = "this is a paragraph";
+    let body = d3.select('body');
+    let p1 = body.select('.area1').selectAll('p');
+    p1.datum(str);
+    p1.text(function (d, i) {
+        return "第" + i + '个元素内容为' + d;
+    });
+    let arr = ['one', 'two', 'three'];
+    let p2 = body.select('.area2').selectAll('p')
+    p2.data(arr);
+    p2.text(function (d, i) {
+        return "第" + i + '个元素内容为' + d
+    })
+</script>
+</body>
+</html>
