@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>扇形图</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+<svg height="300" width="300"></svg>
+
+<script>
+
+    var marge = {top: 30, right: 30, bottom: 30, left: 30},
+        svg = d3.select('svg'),
+        width = svg.attr('width'),
+        height = svg.attr('height');
+
+    var g = svg.append('g')
+        .attr('transform', 'translate(' + marge.top + ', ' + marge.left + ')')
+
+    var dataset = [25, 15, 33, 68, 18];
+
+    // 一个颜色比例尺
+    var colorScale = d3.scaleOrdinal()
+        .domain(d3.range(dataset.length))
+        .range(d3.schemeCategory10);
+
+    // 饼图布局
+    var pie = d3.pie();
+    // 弧线生成器
+    var innerRadius = 0;    // 内半径
+    var outerRadius = 100;  // 外半径
+    var arc_generator = d3.arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
+    // 通过饼图布局转换数据
+    var pieDate = pie(dataset);
+
+    //绘制
+    var gs = g.selectAll('.g')
+        .data(pieDate)
+        .enter()
+        .append('g')
+        .attr('transform', 'translate(' + width / 2 + ', ' + height / 2 + ')')
+
+    // 绘制扇形
+    gs.append('path')
+        .attr('d', function (d) {
+            return arc_generator(d);
+        })
+        .attr('fill', function (d, i) {
+            return colorScale(i);   // 设置颜色
+        });
+    // 添加文字
+    gs.append('text')
+        .attr('transform', function (d) {
+            return 'translate(' + arc_generator.centroid(d) + ')';    // 中心位置
+        })
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#eee')
+        .text(function (d, i) {
+            return d.data;
+        })
+</script>
+</body>
+</html>
