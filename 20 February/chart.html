@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AngularJS D3 Demo</title>
+    <style>
+        .chart .domain {
+            fill: none;
+            stroke-width: 1;
+            stroke: #D4D4D1;
+        }
+
+        .chart .bar {
+            fill: #56BEEB;
+        }
+
+    </style>
+</head>
+<body ng-app="d3App">
+<div ng-controller="HomeCtrl">
+    <div bar-chart="set.y" x="set.x" class="content"></div>
+    <form ng-submit="randomize()" ng-init="randomize()">
+        <div class="form-group">
+            <label>Number of bars:</label>
+            <input type="number" class="form-control" ng-model="n"/>
+        </div>
+        <div>
+            <label>Minimum value of bar:</label>
+            <input type="number" class="form-control" ng-model="min"/>
+        </div>
+        <div>
+            <label>Maximum value of bar:</label>
+            <input type="number" class="form-control" ng-model="max"/>
+        </div>
+        <button type="submit" class="btn btn-default">Generate chart</button>
+    </form>
+</div>
+
+<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://lib.baomitu.com/angular.js/1.5.11/angular.min.js"></script>
+<script src="https://cdn.bootcss.com/lodash.js/4.14.0/lodash.min.js"></script>
+
+<script>
+    var app = angular.module("d3App", []);
+    app.controller("HomeCtrl", function ($scope) {
+
+        $scope.set = {
+            x: [],
+            y: []
+        };
+
+        $scope.n = 10;
+
+        $scope.min = 20;
+
+        $scope.max = 100;
+
+        $scope.randomize = function () {
+            $scope.set.x = [];
+            $scope.set.y = [];
+            _.times($scope.n, function (n) {
+                $scope.set.x.push(n + 1);
+                $scope.set.y.push(_.random($scope.min, $scope.max));
+            });
+        };
+    });
+    app.directive("barChart", function () {
+        return {
+            restrict: 'AE',
+            scope: {
+                x: '=?',
+                y: '=barChart',
+                options: '=?'
+            },
+            link: function (scope, elements, attr) {
+                scope.svg = null;
+                scope.container = null;
+
+                scope.getX = function () {
+                    var x = null;
+                    if (scope.x) {
+                        x = scope.x;
+                    } else {
+                        x = _.keys(scope.y);
+                    }
+                    return x;
+                };
+
+                scope.getOptions = function () {
+                    return Object.assign({
+                        width: 1000,
+                        height: 400,
+                        margin: {
+                            top: 10,
+                            right: 10,
+                            bottom: 30,
+                            left: 50
+                        }
+                    }, scope.options || {});
+                };
+
+                scope.initialize = function () {
+                    scope.svg = d3.select(elements[0]).append("svg").attr("class", "chart");
+                    scope.container = scope.svg.append("g");
+                    scope.container.append("g").attr("class", "x");
+                    scope.container.append("g").attr("class", "y");
+                    scope.setSvgSize();
+                };
+
+                scope.setSvgSize = function () {
+                    var options = scope.getOptions();
+                    scope.container.attr("transform", "translate(" + options.margin.left + ", " + options.margin.right + ")");
+                    scope.svg.attr('viewBox', '0 0 ' + (options.width + options.margin.left + options.margin.right) + ' ' +
+                        (options.height + options.margin.top + options.margin.bottom))
+                        .attr('preserveAspectRatio', 'xMinYMin');
+                    scope.redraw();
+                };
+
+                scope.redraw = function () {
+                    var x, y, xAxis, yAxis, dataset, options = scope.getOptions(), xValues = scope.getX(),
+                        yValues = scope.y;
+                    console.log(xValues);
+                    if (xValues && yValues) {
+                        x = d3.scaleBand().domain(xValues).rangeRound([0, options.width]);
+                        y = d3.scaleLinear().domain([0, d3.max(yValues)]).range([options.height, 0]);
+                        xAxis = d3.axisBottom(x).ticks(5);
+                        yAxis = d3.axisLeft(y).ticks(2);
+                        ;scope.container.selectAll("g.x").attr("transform", "translate(0, " + options.height + ")").call(xAxis);
+                        scope.container.selectAll("g.y").call(yAxis);
+                        dataset = scope.container.selectAll(".bar").data(yValues);
+                        dataset.enter().append("rect").attr("class", "bar");
+                        dataset.attr("x", function (d, i) {
+                            return x(i + 1) + 10;
+                        }).attr("width", function (d) {
+                            return x.step() - 10;
+                        }).attr("height", function (d) {
+                            return options.height - y(d);
+                        }).attr("y", function (d) {
+                            return y(d);
+                        });
+                        dataset.exit().remove();
+                    }
+                };
+
+                /**
+                 * Watch model changes
+                 */
+                scope.$watch('x', scope.redraw);
+                scope.$watch('y', scope.redraw);
+                scope.$watch('options', scope.setSvgSize);
+
+                scope.initialize();
+            }
+        }
+    });
+</script>
+</body>
+</html>
